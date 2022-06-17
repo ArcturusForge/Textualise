@@ -809,6 +809,11 @@ MonoBehaviour:
   genderReplacement: 0
   input: 'Hello, this character is <gender>.
 
+    My name is <if=male>John</if><if=female>Jane</if>.
+
+    A
+    part of this <hide> text is </hide>hidden.
+
     Please change it on the "Tester"
     game object.'
 --- !u!4 &1471076003

@@ -1,5 +1,5 @@
 {
-    "name": "TextualiseAssembly",
+    "name": "Arcturus.Textualise",
     "rootNamespace": "Arcturus.Textualise",
     "references": [],
     "includePlatforms": [],

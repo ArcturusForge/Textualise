@@ -41,8 +41,7 @@ namespace Arcturus.Textualise
         }
 
         /// <summary>
-        /// Parses through the input text looking for any tags and replaces them with the corresponding info if there are.<br/>
-        /// To ignore replacement return '*' when replacement functions are called, which will print the tag instead of replace it.
+        /// Parses through the input text looking for any tags and replaces them with the corresponding info if there are.
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -70,9 +69,12 @@ namespace Arcturus.Textualise
                             finalLine = string.Concat(finalText, Settings.Pins[$"{Settings.OpenSymbol}{line}{Settings.CloseSymbol}"].TagReplacement);
 
                         while (tags.Count > 0) // Loop through all of the open tags.
-                            finalLine = Settings.Wraps[openTags.Pop().Opening].WhileWrapping(finalLine);
+                        {
+                            var tag = tags.Pop();
+                            finalLine = Settings.Wraps[tag.Opening].HandleWrapReplacement(finalLine, WrapReplacementStage.Inside, tag.Data);
+                        }
 
-                        string.Concat(finalText, finalLine);
+                        finalText = string.Concat(finalText, finalLine);
                     }
                     else
                     {
@@ -89,11 +91,50 @@ namespace Arcturus.Textualise
                 // Cycles the tag detection.
                 isTag = false;
 
-                if (Settings.ContainsWrap(line))
+                if (Settings.ContainsWrap(line, out var type))
                 {
-                    var customWrap = Settings.Wraps[$"{Settings.OpenSymbol}{line}{Settings.CloseSymbol}"];
-                    openTags.Push(new OpenTag(customWrap.OpeningTag, customWrap.ClosingTag));
-                    continue;
+                    switch (type)
+                    {
+                        case WrapTagType.Opening:
+                            CustomWrapTag customWrap;
+                            var data = "";
+                            if (line.Contains(Settings.TagDataSplitSymbol.ToString()))
+                            {
+                                var split = line.Split(Settings.TagDataSplitSymbol);
+                                data = split[1];
+                                if (split.Length > 2)
+                                {
+                                    for (int i = 2; i < split.Length; i++)
+                                    {
+                                        // If a custom tag uses the '=' symbol to split more data it needs to be restored.
+                                        data = string.Concat(data, Settings.TagDataSplitSymbol.ToString(), split[i]);
+                                    }
+                                }
+                                customWrap = Settings.Wraps[$"{Settings.OpenSymbol}{split[0]}{Settings.CloseSymbol}"];
+                            }
+                            else
+                                customWrap = Settings.Wraps[$"{Settings.OpenSymbol}{line}{Settings.CloseSymbol}"];
+
+                            openTags.Push(new OpenTag(customWrap.OpeningTag, customWrap.ClosingTag, data));
+                            finalText = string.Concat(finalText, customWrap.HandleWrapReplacement(line, WrapReplacementStage.Opening, openTags.Peek().Data));
+                            continue;
+
+                        case WrapTagType.Closing:
+                            if (openTags.Peek().Closing.Contains(line))
+                            {
+                                var ot = openTags.Pop();
+                                finalText = string.Concat(finalText, Settings.Wraps[ot.Opening].HandleWrapReplacement(line, WrapReplacementStage.Closing, ot.Data));
+                            }
+                            else
+                            {
+                                // Tag Nesting Rule:
+                                // First tag opened must be the last tag closed.
+                                // Vice versa the last tag opened must be the first tag closed.
+                                // Example -> [Tag1 Open] [Tag2 Open] --- [Tag2 Closed] [Tag1 Closed]
+                                Debug.LogError("Wrap tags are being opened and closed while breaking the Tag Nesting Rule!");
+                            }
+                            continue;
+                    }
                 }
             }
 
