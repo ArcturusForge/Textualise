@@ -65,10 +65,10 @@ namespace Arcturus.Textualise
                         var tags = new Stack<OpenTag>(openTags);
                         string finalLine = line;
 
-                        if (isTag) // If pin
-                            finalLine = string.Concat(finalText, Settings.Pins[$"{Settings.OpenSymbol}{line}{Settings.CloseSymbol}"].TagReplacement);
+                        if (isTag) // If pin tag, replace it with the actual text. 
+                            finalLine = Settings.Pins[$"{Settings.OpenSymbol}{line}{Settings.CloseSymbol}"].TagReplacement;
 
-                        while (tags.Count > 0) // Loop through all of the open tags.
+                        while (tags.Count > 0) // Loop through all of the open wrap tags.
                         {
                             var tag = tags.Pop();
                             finalLine = Settings.Wraps[tag.Opening].HandleWrapReplacement(finalLine, WrapReplacementStage.Inside, tag.Data);

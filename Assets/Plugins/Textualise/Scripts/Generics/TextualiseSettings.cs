@@ -107,7 +107,12 @@ namespace Arcturus.Textualise.Internal
         }
 
         /// <summary>
-        /// Creates a CustomWrapTag object and returns it while also assigning it internally.
+        /// Creates a CustomWrapTag object and returns it while also assigning it internally.<br/><br/>
+        /// ReplacementFunc structure:<br/>
+        /// (string) input -> The tag/text that is currently being parsed and replaced.<br/>
+        /// (WrapReplacementStage) stage -> What segment of the tag that is being replaced.<br/>
+        /// (string) data -> The additional data that was detected as part of the tag. Empty if there is no data.<br/>
+        /// Returns string -> The replacement text.
         /// </summary>
         /// <param name="openingTag"></param>
         /// <param name="closingTag"></param>

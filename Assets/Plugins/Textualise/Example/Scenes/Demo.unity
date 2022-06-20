@@ -807,9 +807,9 @@ MonoBehaviour:
   parsedOutput: {fileID: 1470968201}
   defaultOutput: {fileID: 1611725274}
   genderReplacement: 0
-  input: 'Hello, this character is <gender>.
+  input: 'Hello, this character is <col=green><gender></col>.
 
-    My name is <if=male>John</if><if=female>Jane</if>.
+    My name is <col=red><if=male>John</if><if=female>Jane</if></col>.
 
     A
     part of this <hide> text is </hide>hidden.
